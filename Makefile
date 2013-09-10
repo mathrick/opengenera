@@ -7,6 +7,8 @@ BASEBOX=ubuntu-7.10-server-amd64
 
 all: opengenera-box opengenera2.tar.bz2
 
+.PHONY: all vagrant veewee clean
+
 clean:
 	vagrant destroy
 	rm -f *.box snap4.tar.gz
@@ -14,24 +16,28 @@ clean:
 
 # vagrant is a tool for automating virtualbox
 vagrant:
-	if test -z "$$(which vagrant)" ; then \
+	@if test -z "$$(which vagrant)" ; then \
 	  echo "### need to install vagrant"; \
 	  echo "try: sudo gem install vagrant"; \
+	  exit 2; \
+	fi
+
+# veewee is a vagrant plugin to automate installs from distro CDs
+veewee: vagrant
+	@if test -z "$$(bash -c 'vagrant basebox' 2>&1 | grep 'vagrant basebox <command> ')" ; then \
+	  echo "### need to install veewee"; \
+	  echo "try: sudo gem install veewee"; \
+	  exit 2; \
 	fi
 
 # veewee might download an OS image. don't let make auto delete it, it's big!
 .PRECIOUS: %.iso
 
-$(BASEBOX).box:
-	if test -z "$$(bash -c 'vagrant basebox' 2>&1 | grep 'vagrant basebox <command> ')" ; then \
-	  echo "### need to install veewee"; \
-	  echo "try: sudo gem install veewee"; \
-	else \
-	  echo "### need to build $(BASEBOX).box"; \
-	  vagrant basebox build --force $(BASEBOX); \
-	  vagrant basebox validate $(BASEBOX); \
-	  vagrant basebox export   $(BASEBOX); \
-	fi
+$(BASEBOX).box: veewee
+	  echo "### need to build $(BASEBOX).box";
+	  vagrant basebox build --force $(BASEBOX);
+	  vagrant basebox validate $(BASEBOX);
+	  vagrant basebox export   $(BASEBOX);
 
 # test that the opengenera box is installed. make it if not.
 opengenera-box: vagrant
