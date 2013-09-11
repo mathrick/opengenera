@@ -1,8 +1,11 @@
 require_recipe "apt"
 
-execute "install base packages" do
-  command "apt-get install -y curl vnc4server nfs-common nfs-user-server inetutils-inetd blackbox"
-end
+apt_package "curl"
+apt_package "vnc4server"
+apt_package "nfs-common"
+apt_package "nfs-user-server"
+apt_package "inetutils-inetd"
+apt_package "blackbox"
 
 execute "expand opengenera" do
   creates "/opt/og2"
