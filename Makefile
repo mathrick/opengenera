@@ -5,7 +5,7 @@
 # is just too messy and brittle, and we only target Linux hosts, where
 # no other make is installed anyway
 
-BASEBOX=ubuntu-7.10-server-amd64
+BASEBOX=opengenera-ubuntu-7.10-server-amd64
 
 all: have_opengenera opengenera2.tar.bz2
 
