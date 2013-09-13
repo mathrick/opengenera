@@ -78,8 +78,9 @@ execute "allow global write to genera files" do
   command "chmod ugo+w -R /var/lib/symbolics/sys.sct"
 end
 
-execute "clear vnc.pid on startup" do
-  command "echo 'rm -f /root/.vnc/genera-host:1.pid' > /etc/rc.local"
+cookbook_file "/etc/rc.local" do
+  source "rc.local"
+  mode "0755"
 end
 
 execute "start opengenera under vnc" do
