@@ -6,6 +6,7 @@ apt_package "nfs-common"
 apt_package "nfs-user-server"
 apt_package "inetutils-inetd"
 apt_package "blackbox"
+apt_package "wmctrl"
 
 execute "expand opengenera" do
   creates "/opt/og2"

@@ -10,5 +10,11 @@ xsetroot -solid grey
 vncconfig -iconic &
 xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
 blackbox &
+
 cd /var/lib/symbolics
 ./genera >& genera.log &
+
+# Wait for the Genera window to set it fullscreen, but wait a
+# second. It will hang if its geometry is changed immediately after
+# the window is mapped.
+until wmctrl -l | grep Genera; do sleep 0.1; done && sleep 1 && wmctrl -ir `wmctrl -l | grep Genera | cut -f1 -d' '` -b add,fullscreen
