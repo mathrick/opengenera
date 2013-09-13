@@ -85,8 +85,9 @@ cookbook_file "/etc/rc.local" do
   mode "0755"
 end
 
-cookbook_file "/root/.Xmodmap" do
-  source "xmodmap"
+template "/root/.Xmodmap" do
+  only_if { File.exist?("/vagrant/keybindings") }
+  source "xmodmap.erb"
   mode "0755"
 end
 
@@ -103,12 +104,15 @@ bash "install TigerVNC server" do
   tar -xzf tigervnc-0.0.91.tar.gz tigervnc-0.0.91/unix/vncserver --strip-components=2
   mv vncserver /usr/bin/vncserver.tiger
   update-alternatives --install /usr/bin/vncserver vncserver /usr/bin/vncserver.tiger 1001
+  mkdir -p /home/ossman/devel/tigervnc/1_0/unix/xorg.build/
+  ln -s /usr/bin /home/ossman/devel/tigervnc/1_0/unix/xorg.build/
+  ln -s /usr/share /home/ossman/devel/tigervnc/1_0/unix/xorg.build/
+  mkdir -p /home/ossman/devel/tigervnc/1_0/unix/xorg.build/share/X11/xkb/compiled
   EOF
 end
 
 execute "start opengenera under vnc" do
   creates "/root/.vnc/genera-host:1.pid"
-  # vncserver is kinda broken and won't accept just +kb, which is not
-  # enabled in TigerVNC by default, but needed to get OG to run
-  command "vncserver -kb +kb"
+  # XKB is not enabled in TigerVNC by default, but needed to get OG to run
+  command "vncserver -xkbdir /usr/share/X11/xkb/ +kb -fp /usr/share/fonts/X11/misc/"
 end
