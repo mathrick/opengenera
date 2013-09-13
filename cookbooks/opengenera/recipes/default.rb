@@ -5,8 +5,9 @@ apt_package "vnc4server"
 apt_package "nfs-common"
 apt_package "nfs-user-server"
 apt_package "inetutils-inetd"
-apt_package "blackbox"
+apt_package "openbox"
 apt_package "wmctrl"
+apt_package "lib32z1"
 
 execute "expand opengenera" do
   creates "/opt/og2"
@@ -84,7 +85,30 @@ cookbook_file "/etc/rc.local" do
   mode "0755"
 end
 
+cookbook_file "/root/.Xmodmap" do
+  source "xmodmap"
+  mode "0755"
+end
+
+# TigerVNC supports dynamic desktop resizing and 0.90.1 is old enough not to break OpenGenera
+bash "install TigerVNC server" do
+  creates "/usr/bin/vncserver.tiger"
+  cwd "/tmp/"
+  code <<-EOF
+  wget -N http://sourceforge.net/projects/tigervnc/files/tigervnc/0.0.91/Xvnc-0.0.91.tar.gz/download
+  wget -N http://sourceforge.net/projects/tigervnc/files/tigervnc/0.0.91/tigervnc-0.0.91.tar.gz/download
+  tar -xzf Xvnc-0.0.91.tar.gz
+  mv Xvnc /usr/bin/Xvnc.tiger
+  update-alternatives --install /usr/bin/Xvnc Xvnc /usr/bin/Xvnc.tiger 1001
+  tar -xzf tigervnc-0.0.91.tar.gz tigervnc-0.0.91/unix/vncserver --strip-components=2
+  mv vncserver /usr/bin/vncserver.tiger
+  update-alternatives --install /usr/bin/vncserver vncserver /usr/bin/vncserver.tiger 1001
+  EOF
+end
+
 execute "start opengenera under vnc" do
   creates "/root/.vnc/genera-host:1.pid"
-  command "vncserver"
+  # vncserver is kinda broken and won't accept just +kb, which is not
+  # enabled in TigerVNC by default, but needed to get OG to run
+  command "vncserver -kb +kb"
 end
