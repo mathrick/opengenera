@@ -1,8 +1,13 @@
 require_recipe "apt"
 
-execute "install base packages" do
-  command "apt-get install -y curl vnc4server nfs-common nfs-user-server inetutils-inetd blackbox"
-end
+apt_package "curl"
+apt_package "vnc4server"
+apt_package "nfs-common"
+apt_package "nfs-user-server"
+apt_package "inetutils-inetd"
+apt_package "openbox"
+apt_package "wmctrl"
+apt_package "lib32z1"
 
 execute "expand opengenera" do
   creates "/opt/og2"
@@ -75,11 +80,39 @@ execute "allow global write to genera files" do
   command "chmod ugo+w -R /var/lib/symbolics/sys.sct"
 end
 
-execute "clear vnc.pid on startup" do
-  command "echo 'rm -f /root/.vnc/genera-host:1.pid' > /etc/rc.local"
+cookbook_file "/etc/rc.local" do
+  source "rc.local"
+  mode "0755"
+end
+
+template "/root/.Xmodmap" do
+  only_if { File.exist?("/vagrant/keybindings") }
+  source "xmodmap.erb"
+  mode "0755"
+end
+
+# TigerVNC supports dynamic desktop resizing and 0.90.1 is old enough not to break OpenGenera
+bash "install TigerVNC server" do
+  creates "/usr/bin/vncserver.tiger"
+  cwd "/tmp/"
+  code <<-EOF
+  wget -N http://sourceforge.net/projects/tigervnc/files/tigervnc/0.0.91/Xvnc-0.0.91.tar.gz/download
+  wget -N http://sourceforge.net/projects/tigervnc/files/tigervnc/0.0.91/tigervnc-0.0.91.tar.gz/download
+  tar -xzf Xvnc-0.0.91.tar.gz
+  mv Xvnc /usr/bin/Xvnc.tiger
+  update-alternatives --install /usr/bin/Xvnc Xvnc /usr/bin/Xvnc.tiger 1001
+  tar -xzf tigervnc-0.0.91.tar.gz tigervnc-0.0.91/unix/vncserver --strip-components=2
+  mv vncserver /usr/bin/vncserver.tiger
+  update-alternatives --install /usr/bin/vncserver vncserver /usr/bin/vncserver.tiger 1001
+  mkdir -p /home/ossman/devel/tigervnc/1_0/unix/xorg.build/
+  ln -s /usr/bin /home/ossman/devel/tigervnc/1_0/unix/xorg.build/
+  ln -s /usr/share /home/ossman/devel/tigervnc/1_0/unix/xorg.build/
+  mkdir -p /home/ossman/devel/tigervnc/1_0/unix/xorg.build/share/X11/xkb/compiled
+  EOF
 end
 
 execute "start opengenera under vnc" do
   creates "/root/.vnc/genera-host:1.pid"
-  command "vncserver"
+  # XKB is not enabled in TigerVNC by default, but needed to get OG to run
+  command "vncserver -xkbdir /usr/share/X11/xkb/ +kb -fp /usr/share/fonts/X11/misc/"
 end

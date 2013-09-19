@@ -1,0 +1,10 @@
+! This file contains example xmodmap(1) commands to set up all the
+! keys you need to use OpenGenera. The exact definitions depend on the
+! particulars of your system, but some commonly-applicable ones have
+! been included below. If you want to use them, copy the contents to a
+! file called "keybindings", then run "vagrant reload".
+
+! Make left Alt behave as Meta
+keysym Alt_L = Meta_L Alt_L
+keysym Alt_L = Meta_L Alt_L
+add mod1 = Meta_L

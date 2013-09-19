@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Clear VNC pidfile on startup
+rm -f /root/.vnc/genera-host:1.pid
