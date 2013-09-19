@@ -29,4 +29,4 @@ Enjoy!
 http://www.textfiles.com/bitsavers/pdf/symbolics/
 
 ![splash screen next to my IRC client](http://github.com/mathrick/opengenera/raw/master/screenshots/desktop.png) 
-![documentation viewer in a rootless window](http://github.com/mathrick/opengenera/raw/master/screenshots/rootles.png) 
+![documentation viewer in a rootless window](http://github.com/mathrick/opengenera/raw/master/screenshots/rootless.png) 
